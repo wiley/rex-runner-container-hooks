@@ -4,7 +4,6 @@ import { ContainerInfo, Registry } from 'hooklib'
 import * as stream from 'stream'
 import {
   getJobPodName,
-  getRunnerPodName,
   getSecretName,
   getStepPodName,
   getVolumeClaimName,
