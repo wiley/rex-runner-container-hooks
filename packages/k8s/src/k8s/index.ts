@@ -558,15 +558,15 @@ export async function isPodContainerAlpine(
   return isAlpine
 }
 
-async function getCurrentNodeName(): Promise<string> {
-  const resp = await k8sApi.readNamespacedPod(getRunnerPodName(), namespace())
-
-  const nodeName = resp.body.spec?.nodeName
-  if (!nodeName) {
-    throw new Error('Failed to determine node name')
-  }
-  return nodeName
-}
+// async function getCurrentNodeName(): Promise<string> {
+//   const resp = await k8sApi.readNamespacedPod(getRunnerPodName(), namespace())
+//
+//   const nodeName = resp.body.spec?.nodeName
+//   if (!nodeName) {
+//     throw new Error('Failed to determine node name')
+//   }
+//   return nodeName
+// }
 
 export function namespace(): string {
   if (process.env['ACTIONS_RUNNER_KUBERNETES_NAMESPACE']) {
