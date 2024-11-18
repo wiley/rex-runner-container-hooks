@@ -172,7 +172,7 @@ export function generateContainerName(image: string): string {
     throw new Error(`Image definition '${image}' is invalid`)
   }
 
- return name
+  return name
 }
 
 // Overwrite or append based on container options
