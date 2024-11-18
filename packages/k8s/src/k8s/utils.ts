@@ -172,8 +172,7 @@ export function generateContainerName(image: string): string {
     throw new Error(`Image definition '${image}' is invalid`)
   }
 
-  const randomSuffix = uuidv4().substring(0, 6)
-  return `${name.substring(0, 56)}-${randomSuffix}` // 63 is the max length for container name
+ return name
 }
 
 // Overwrite or append based on container options
