@@ -60,23 +60,15 @@ export async function prepareJob(
   }
 
   let services: k8s.V1Container[] = []
-  const duplicates = new Map<string, number>()
-
   if (args.services?.length) {
     services = args.services.map(service => {
       core.debug(`Adding service '${service.image}' to pod definition`)
-
-      let name = generateContainerName(service.image)
-
-      const ind = duplicates.get(name)
-      if (ind === undefined) {
-        duplicates.set(name, 0)
-      } else {
-        duplicates.set(name, ind + 1)
-        name = `${name}${ind + 1}`
-      }
-
-      return createContainerSpec(service, name, false, extension)
+      return createContainerSpec(
+        service,
+        generateContainerName(service.image),
+        false,
+        extension
+      )
     })
   }
 
@@ -84,7 +76,6 @@ export async function prepareJob(
     throw new Error('No containers exist, skipping hook invocation')
   }
 
-  core.debug('creating pod')
   let createdPod: k8s.V1Pod | undefined = undefined
   try {
     createdPod = await createPod(
