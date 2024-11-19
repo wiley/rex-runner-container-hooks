@@ -58,6 +58,10 @@ export function containerVolumes(
   mounts.push(
     {
       name: POD_VOLUME_NAME,
+      mountPath: '/whole_work_volume/_work'
+    },
+    {
+      name: POD_VOLUME_NAME,
       mountPath: '/__e',
       subPath: 'externals'
     },
@@ -184,6 +188,7 @@ export function mergeContainerWithOptions(
   from: k8s.V1Container
 ): void {
   for (const [key, value] of Object.entries(from)) {
+    core.debug(`Merging container options: ${key} = ${value}`)
     if (key === 'name') {
       if (value !== CONTAINER_EXTENSION_PREFIX + base.name) {
         core.warning("Skipping name override: name can't be overwritten")
@@ -259,18 +264,16 @@ export function mergeObjectMeta(
 
 export function readExtensionFromFile(): k8s.V1PodTemplateSpec | undefined {
   const filePath = process.env[ENV_HOOK_TEMPLATE_PATH]
+  core.debug(`Reading extension from file${filePath}`)
   if (!filePath) {
     return undefined
   }
   const doc = yaml.load(fs.readFileSync(filePath, 'utf8'))
   if (!doc || typeof doc !== 'object') {
+    core.debug(`Failed to parse ${filePath}`)
     throw new Error(`Failed to parse ${filePath}`)
   }
   return doc as k8s.V1PodTemplateSpec
-}
-
-export function useKubeScheduler(): boolean {
-  return process.env[ENV_USE_KUBE_SCHEDULER] === 'true'
 }
 
 export enum PodPhase {
