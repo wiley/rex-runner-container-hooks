@@ -45,6 +45,9 @@ export class Cp {
     const stats = fs.statSync(tmpFileName)
     const fileSizeInBytes = stats.size
     core.debug(`Transferring: ${fileSizeInBytes.toLocaleString()} Bytes`)
+    process.on('warning', (warning) => {
+      console.log(warning.stack);
+    });
 
     const readStream = fs.createReadStream(tmpFileName)
     const errStream = new WritableStreamBuffer()
