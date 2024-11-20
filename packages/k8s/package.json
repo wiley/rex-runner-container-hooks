@@ -19,7 +19,8 @@
     "@kubernetes/client-node": "^0.22.2",
     "hooklib": "file:../hooklib",
     "js-yaml": "^4.1.0",
-    "shlex": "^2.1.2"
+    "shlex": "^2.1.2",
+    "stream-buffers": "3.0.3"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
