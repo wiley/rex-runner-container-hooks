@@ -1,5 +1,4 @@
 import * as fs from 'fs'
-import { WritableStreamBuffer } from 'stream-buffers'
 import * as tar from 'tar'
 import * as core from '@actions/core'
 import { tmpdir } from 'os'
@@ -50,8 +49,6 @@ export class Cp {
     });
 
     const readStream = fs.createReadStream(tmpFileName)
-    const errStream = new WritableStreamBuffer()
-    const stdStream = new WritableStreamBuffer()
 
     core.debug('Exec cpToPod')
 
@@ -63,20 +60,18 @@ export class Cp {
           podName,
           containerName,
           command,
-          stdStream,
-          errStream,
+          null,
+          null,
           readStream,
           false,
           async ({ status }) => {
             // this never happens
             core.debug(`cpToPod status: ${status}`)
-            core.debug(`exec stdstream: ${stdStream.getContentsAsString()}`)
-            core.debug(`exec errstream: ${errStream.getContentsAsString()}`)
 
-            if (status === 'Failure' || errStream.size()) {
+            if (status === 'Failure') {
               reject(
                 new Error(
-                  `Error from cpToPod - details: \n ${errStream.getContentsAsString()}`
+                  `Error from cpToPod`
                 )
               )
             } else {
@@ -86,9 +81,6 @@ export class Cp {
         )
       ).addEventListener('close', () => {
         core.debug('Done copying files to pod')
-        // Possible rejection or resolution based on additional logic (e.g., checking if a resolution or rejection already occurred).
-        core.debug(`exec std stream: ${stdStream.getContentsAsString()}`)
-        core.debug(`exec err stream: ${errStream.getContentsAsString()}`)
         resolve()
       })
     })
