@@ -43,14 +43,14 @@ describe('Utilities', () => {
 
   describe('with docker options', () => {
     it('should augment options with docker environment variables', () => {
-      process.env.DOCKER_HOST = 'unix:///run/user/1001/docker.sock'
+      process.env.DOCKER_HOST = 'unix:///Users/aladdin/.rd/docker.sock'
       process.env.DOCKER_NOTEXIST = 'notexist'
 
       const optionDefinitions: any = [
         undefined,
         {},
         { env: {} },
-        { env: { DOCKER_HOST: 'unix://var/run/docker.sock' } }
+        { env: { DOCKER_HOST: 'unix:///Users/aladdin/.rd/docker.sock' } }
       ]
       for (const opt of optionDefinitions) {
         let options = optionsWithDockerEnvs(opt)
@@ -62,7 +62,7 @@ describe('Utilities', () => {
     })
 
     it('should not overwrite other options', () => {
-      process.env.DOCKER_HOST = 'unix:///run/user/1001/docker.sock'
+      process.env.DOCKER_HOST = 'unix:///Users/aladdin/.rd/docker.sock'
       const opt = {
         workingDir: 'test',
         input: Buffer.from('test')
