@@ -57,13 +57,13 @@ export async function runScriptStep(
           core.debug(
             'Copying from: ' +
               resolvedPath +
-              'to home/runner/_work/_temp/_runner_file_commands/'
+              'to /home/runner/_work/_temp/_runner_file_commands/'
           )
           await copyFromPod(
             state.jobPod,
             JOB_CONTAINER_NAME,
             newSource,
-            resolvedPath
+            '/home/runner/_work/_temp/_runner_file_commands/'
           )
         } else {
           core.debug(
