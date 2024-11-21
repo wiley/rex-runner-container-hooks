@@ -247,7 +247,38 @@ export async function copyToPod(
   core.debug(`Copy completed in ${elapsedTime} milliseconds`)
 }
 
-export async function execPodStep(
+export async function copyFromPod(
+  podName: string,
+  containerName: string,
+  sourcePath: string,
+  targetPath: string
+): Promise<void> {
+  const startTime = Date.now()
+  try {
+    const cp = new k8s.Cp(kc)
+
+    core.debug(
+      `Copying from pod ${podName} container ${containerName} from ${sourcePath} to ${targetPath} in namespace ${namespace()}`
+    )
+    await cp.cpFromPod(
+      namespace(),
+      podName,
+      containerName,
+      parse(sourcePath).base,
+      targetPath,
+      dirname(sourcePath)
+    )
+  } catch (error) {
+    core.error(`Error copying to pod: ${error}`)
+    throw new Error('Error copying to pod')
+  }
+
+  const endTime = Date.now()
+  const elapsedTime = endTime - startTime
+  core.debug(`Copy completed in ${elapsedTime} milliseconds`)
+}
+
+export async function   execPodStep(
   command: string[],
   podName: string,
   containerName: string,
