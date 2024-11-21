@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as fs from 'fs'
 import * as core from '@actions/core'
-import *  as path from 'path'
+import * as path from 'path'
 import { RunScriptStepArgs } from 'hooklib'
 import { execPodStep, copyToPod, copyFromPod } from '../k8s'
 import { writeEntryPointScript } from '../k8s/utils'
 import { JOB_CONTAINER_NAME } from './constants'
-
 
 export async function runScriptStep(
   args: RunScriptStepArgs,
@@ -40,33 +39,41 @@ export async function runScriptStep(
       state.jobPod,
       JOB_CONTAINER_NAME
     )
-    const githuboutput = process.env.GITHUB_OUTPUT;
+    const githuboutput = process.env.GITHUB_OUTPUT
     if (githuboutput) {
       try {
-        core.debug("GITHUB_OUTPUT is presented: " + githuboutput)
-        const resolvedPath = path.resolve(githuboutput);
+        core.debug('GITHUB_OUTPUT is presented: ' + githuboutput)
+        const resolvedPath = path.resolve(githuboutput)
         if (fs.existsSync(resolvedPath)) {
-
-          const fileName = path.basename(resolvedPath); // Extract the filename
-          const directoryName = path.dirname(resolvedPath); // Extract the directory name
-          core.debug("GITHUB_OUTPUT is a path, its dir is: " + directoryName + " its filename is: "
-          + fileName)
-          core.debug("Copying from: " + resolvedPath + "to home/runner/_work/_temp/_runner_file_commands/")
+          const fileName = path.basename(resolvedPath) // Extract the filename
+          const directoryName = path.dirname(resolvedPath) // Extract the directory name
+          core.debug(
+            'GITHUB_OUTPUT is a path, its dir is: ' +
+              directoryName +
+              ' its filename is: ' +
+              fileName
+          )
+          core.debug(
+            'Copying from: ' +
+              resolvedPath +
+              'to home/runner/_work/_temp/_runner_file_commands/'
+          )
           await copyFromPod(
             state.jobPod,
             JOB_CONTAINER_NAME,
             resolvedPath,
             '/home/runner/_work/_temp/_runner_file_commands/'
           )
-
         } else {
-          core.debug(`The path specified in GITHUB_OUTPUT does not exist: ${resolvedPath}`);
+          core.debug(
+            `The path specified in GITHUB_OUTPUT does not exist: ${resolvedPath}`
+          )
         }
       } catch (error) {
-        console.error(`Error validating GITHUB_OUTPUT path:`, error);
+        console.error(`Error validating GITHUB_OUTPUT path:`, error)
       }
     } else {
-      console.warn('GITHUB_OUTPUT environment variable is not set.');
+      console.warn('GITHUB_OUTPUT environment variable is not set.')
     }
   } catch (err) {
     core.debug(`execPodStep failed: ${JSON.stringify(err)}`)

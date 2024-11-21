@@ -278,7 +278,7 @@ export async function copyFromPod(
   core.debug(`Copy completed in ${elapsedTime} milliseconds`)
 }
 
-export async function   execPodStep(
+export async function execPodStep(
   command: string[],
   podName: string,
   containerName: string,

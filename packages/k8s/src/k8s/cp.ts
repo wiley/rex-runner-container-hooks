@@ -44,9 +44,9 @@ export class Cp {
     const stats = fs.statSync(tmpFileName)
     const fileSizeInBytes = stats.size
     core.debug(`Transferring: ${fileSizeInBytes.toLocaleString()} Bytes`)
-    process.on('warning', (warning) => {
-      console.log(warning.stack);
-    });
+    process.on('warning', warning => {
+      console.log(warning.stack)
+    })
 
     const readStream = fs.createReadStream(tmpFileName)
 
@@ -69,11 +69,7 @@ export class Cp {
             core.debug(`cpToPod status: ${status}`)
 
             if (status === 'Failure') {
-              reject(
-                new Error(
-                  `Error from cpToPod`
-                )
-              )
+              reject(new Error(`Error from cpToPod`))
             } else {
               resolve()
             }
