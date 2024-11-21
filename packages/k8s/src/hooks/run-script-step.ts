@@ -53,6 +53,7 @@ export async function runScriptStep(
               ' its filename is: ' +
               fileName
           )
+          const newSource = path.resolve('/__w/_temp/_runner_file_commands/',fileName)
           core.debug(
             'Copying from: ' +
               resolvedPath +
@@ -61,8 +62,8 @@ export async function runScriptStep(
           await copyFromPod(
             state.jobPod,
             JOB_CONTAINER_NAME,
-            resolvedPath,
-            '/home/runner/_work/_temp/_runner_file_commands/'
+            newSource,
+            resolvedPath
           )
         } else {
           core.debug(

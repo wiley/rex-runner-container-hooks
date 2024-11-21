@@ -66,8 +66,8 @@ export default class TestSetup {
   private get systemMountVolumes(): Mount[] {
     return [
       {
-        sourceVolumePath: '/var/run/docker.sock',
-        targetVolumePath: '/var/run/docker.sock',
+        sourceVolumePath: '/Users/aladdin/.rd/docker.sock',
+        targetVolumePath: '/Users/aladdin/.rd/docker.sock',
         readOnly: false
       },
       {
