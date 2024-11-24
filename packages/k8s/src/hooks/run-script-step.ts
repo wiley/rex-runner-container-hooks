@@ -61,7 +61,7 @@ export async function runScriptStep(
           await copyFromPod(
             state.jobPod,
             JOB_CONTAINER_NAME,
-            '/__w/_temp/_runner_file_commands/*',
+            '/__w/_temp/_runner_file_commands/.',
             '/home/runner/_work/_temp/_runner_file_commands/'
           )
         } else {
