@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as core from '@actions/core'
 import { RunScriptStepArgs } from 'hooklib'
 import { execPodStep, copyToPod, copyFromPod } from '../k8s'
-import { writeEntryPointScript } from '../k8s/utils'
+import { findParentGitRepos, writeEntryPointScript } from '../k8s/utils'
 import { JOB_CONTAINER_NAME } from './constants'
 
 export async function runScriptStep(
@@ -43,6 +43,17 @@ export async function runScriptStep(
       '/__w/_temp/_runner_file_commands/.',
       '/home/runner/_work/_temp/_runner_file_commands/'
     )
+    const gitRepos = findParentGitRepos('/__w')
+    core.debug( findParentGitRepos('__w').length > 0 ? `found the following git repos: ${gitRepos}` : 'No git repos found')
+    core.debug(`Found get repos: " ${gitRepos}`)
+    for (const gitRepo of gitRepos) {
+      await copyFromPod(
+        state.jobPod,
+        JOB_CONTAINER_NAME,
+        gitRepo,
+        '/home/runner/_work/'
+      )
+    }
   } catch (err) {
     core.debug(`execPodStep failed: ${JSON.stringify(err)}`)
     const message = (err as any)?.response?.body?.message || err

@@ -297,3 +297,34 @@ function mergeLists<T>(base?: T[], from?: T[]): T[] {
 export function fixArgs(args: string[]): string[] {
   return shlex.split(args.join(' '))
 }
+
+export function isGitRepo(dirPath: string) {
+  return fs.existsSync(path.join(dirPath, '.git'))
+}
+
+export function findParentGitRepos(baseDir: string): string[] {
+  const result: string[] = []; // Explicitly type the result array
+
+  if (!fs.existsSync(baseDir)) {
+    console.error(`The base directory "${baseDir}" does not exist.`);
+    return result;
+  }
+
+  const subDirs = fs.readdirSync(baseDir, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => path.join(baseDir, dirent.name));
+
+  for (const subDir of subDirs) {
+    const innerDirs = fs.readdirSync(subDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => path.join(subDir, dirent.name));
+
+    for (const innerDir of innerDirs) {
+      if (path.basename(subDir) === path.basename(innerDir) && isGitRepo(innerDir)) {
+        result.push(subDir);
+        break;
+      }
+    }
+  }
+  return result;
+}
