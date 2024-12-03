@@ -44,8 +44,7 @@ export async function runScriptStep(
       '/home/runner/_work/_temp/_runner_file_commands/'
     )
     const gitRepos = findParentGitRepos('/__w')
-    core.debug( findParentGitRepos('__w').length > 0 ? `found the following git repos: ${gitRepos}` : 'No git repos found')
-    core.debug(`Found get repos: " ${gitRepos}`)
+    core.debug( gitRepos.length > 0 ? `found the following git repos: ${gitRepos}` : 'No git repos found')
     for (const gitRepo of gitRepos) {
       await copyFromPod(
         state.jobPod,

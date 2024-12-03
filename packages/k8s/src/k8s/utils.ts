@@ -306,19 +306,19 @@ export function findParentGitRepos(baseDir: string): string[] {
   const result: string[] = []; // Explicitly type the result array
 
   if (!fs.existsSync(baseDir)) {
-    console.error(`The base directory "${baseDir}" does not exist.`);
+    core.error(`The base directory "${baseDir}" does not exist.`);
     return result;
   }
 
   const subDirs = fs.readdirSync(baseDir, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
     .map(dirent => path.join(baseDir, dirent.name));
-
+  core.debug(`found the following sub directories inside ${baseDir}: ${subDirs}`)
   for (const subDir of subDirs) {
     const innerDirs = fs.readdirSync(subDir, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory())
       .map(dirent => path.join(subDir, dirent.name));
-
+    core.debug(`found the following sub in directories inside ${subDir}: ${subDirs}`)
     for (const innerDir of innerDirs) {
       if (path.basename(subDir) === path.basename(innerDir) && isGitRepo(innerDir)) {
         result.push(subDir);
