@@ -282,7 +282,8 @@ export async function execPodStep(
   command: string[],
   podName: string,
   containerName: string,
-  stdin?: stream.Readable
+  stdin?: stream.Readable,
+  stdout?: stream.Writable
 ): Promise<void> {
   const exec = new k8s.Exec(kc)
   command = fixArgs(command)
@@ -294,7 +295,7 @@ export async function execPodStep(
         podName,
         containerName,
         command,
-        process.stdout,
+        stdout ?? process.stdout,
         process.stderr,
         stdin ?? null,
         false /* tty */,

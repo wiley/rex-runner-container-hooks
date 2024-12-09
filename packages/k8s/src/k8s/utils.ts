@@ -5,9 +5,10 @@ import * as core from '@actions/core'
 import { Mount } from 'hooklib'
 import * as path from 'path'
 import { v1 as uuidv4 } from 'uuid'
-import { POD_VOLUME_NAME } from './index'
+import { execPodStep, POD_VOLUME_NAME } from './index'
 import { CONTAINER_EXTENSION_PREFIX } from '../hooks/constants'
 import * as shlex from 'shlex'
+import stream from 'stream'
 
 export const DEFAULT_CONTAINER_ENTRY_POINT_ARGS = [`-f`, `/dev/null`]
 export const DEFAULT_CONTAINER_ENTRY_POINT = 'tail'
@@ -298,33 +299,14 @@ export function fixArgs(args: string[]): string[] {
   return shlex.split(args.join(' '))
 }
 
-export function isGitRepo(dirPath: string) {
-  return fs.existsSync(path.join(dirPath, '.git'))
-}
-
-export function findParentGitRepos(baseDir: string): string[] {
-  const result: string[] = []; // Explicitly type the result array
-
-  if (!fs.existsSync(baseDir)) {
-    core.error(`The base directory "${baseDir}" does not exist.`);
-    return result;
-  }
-
-  const subDirs = fs.readdirSync(baseDir, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => path.join(baseDir, dirent.name));
-  core.debug(`found the following sub directories inside ${baseDir}: ${subDirs}`)
-  for (const subDir of subDirs) {
-    const innerDirs = fs.readdirSync(subDir, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => path.join(subDir, dirent.name));
-    core.debug(`found the following sub in directories inside ${subDir}: ${subDirs}`)
-    for (const innerDir of innerDirs) {
-      if (path.basename(subDir) === path.basename(innerDir) && isGitRepo(innerDir)) {
-        result.push(subDir);
-        break;
-      }
-    }
-  }
-  return result;
+export async function callGitCommand(podName: string, containerName: string) : Promise<void> {
+  const command = ['bash -c', '/custom_script/git_detector.sh', '/__w']
+  const passThrough = new stream.PassThrough()
+  let output = ''
+  passThrough.on('data', chunk => {
+    output += chunk.toString()
+  })
+  await execPodStep(command, podName, containerName, undefined, passThrough)
+  passThrough.end()
+  core.debug(output)
 }
