@@ -307,6 +307,5 @@ export async function callGitCommand(podName: string, containerName: string) : P
     output += chunk.toString()
   })
   await execPodStep(command, podName, containerName, undefined, passThrough)
-  core.debug(`running command ${command}`)
-  core.debug(output)
+  core.debug(`pass through output ${output}`)
 }
