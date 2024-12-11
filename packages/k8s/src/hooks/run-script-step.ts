@@ -26,12 +26,19 @@ export async function runScriptStep(
   args.entryPoint = 'sh'
   args.entryPointArgs = ['-e', containerPath]
   try {
-    core.debug('Starting script step')
+    core.debug('copying temp')
     await copyToPod(
       state.jobPod,
       JOB_CONTAINER_NAME,
       '/home/runner/_work/_temp',
       '/__w/'
+    )
+    core.debug('copying actions')
+    await copyToPod(
+      state.jobPod,
+      JOB_CONTAINER_NAME,
+      '/home/runner/_work/_actions/actions',
+      '/__w/_actions'
     )
 
     core.debug('Running script by execPodStep')
