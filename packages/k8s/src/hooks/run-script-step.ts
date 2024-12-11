@@ -33,13 +33,13 @@ export async function runScriptStep(
       '/home/runner/_work/_temp',
       '/__w/'
     )
-    if ( fs.existsSync('home/runner/_work/_actions/actions')){
+    if ( fs.existsSync('/home/runner/_work/_actions')){
       core.debug('copying actions')
       await copyToPod(
         state.jobPod,
         JOB_CONTAINER_NAME,
-        '/home/runner/_work/_actions/actions',
-        '/__w/_actions'
+        '/home/runner/_work/_actions/.',
+        '/__w/_actions/'
       )
     }
     core.debug('Running script by execPodStep')
