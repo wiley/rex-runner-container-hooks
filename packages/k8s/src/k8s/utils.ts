@@ -320,7 +320,7 @@ export async function syncGitRepos(podName: string, containerName: string) : Pro
       await copyFromPod(
         podName,
         containerName,
-        path.join('/__w',line.trim(),'/.'),
+        path.join('/__w',line.trim())+'/.',
         path.join('/home/runner/_work',line.trim())
       )
 
