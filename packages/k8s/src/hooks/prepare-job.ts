@@ -110,13 +110,13 @@ export async function prepareJob(
     throw new Error(`pod failed to come online with error: ${err}`)
   }
 
-  core.debug('Writing externals to pod')
-  await copyToPod(
-    createdPod.metadata.name,
-    JOB_CONTAINER_NAME,
-    '/home/runner/_work',
-    '/whole_work_volume/'
-  )
+  // core.debug('Writing externals to pod')
+  // await copyToPod(
+  //   createdPod.metadata.name,
+  //   JOB_CONTAINER_NAME,
+  //   '/home/runner/_work',
+  //   '/whole_work_volume/'
+  // )
 
   core.debug('Job pod is ready for traffic')
 

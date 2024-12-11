@@ -312,7 +312,7 @@ export async function syncGitRepos(podName: string, containerName: string) : Pro
   const prefixPath = '/home/runner/_work/';
   for (const line of reposPaths) {
     core.debug(`found a repo ${line}`)
-    const resolvedPath = path.join(prefixPath, line.trim());
+    const resolvedPath = path.join(prefixPath, line.trim(), line.trim());
     const gitFilePath = path.join(resolvedPath, '.git');
     core.debug(`checking if ${gitFilePath} has a git file`)
     if (!fs.existsSync(gitFilePath)) {
