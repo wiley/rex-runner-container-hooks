@@ -5,8 +5,8 @@ import * as core from '@actions/core'
 import { Mount } from 'hooklib'
 import * as path from 'path'
 import { v1 as uuidv4 } from 'uuid'
-import { execPodStep, POD_VOLUME_NAME } from './index'
-import { CONTAINER_EXTENSION_PREFIX } from '../hooks/constants'
+import { copyFromPod, execPodStep, POD_VOLUME_NAME } from './index'
+import { CONTAINER_EXTENSION_PREFIX, JOB_CONTAINER_NAME } from '../hooks/constants'
 import * as shlex from 'shlex'
 import stream from 'stream'
 
@@ -299,7 +299,7 @@ export function fixArgs(args: string[]): string[] {
   return shlex.split(args.join(' '))
 }
 
-export async function callGitCommand(podName: string, containerName: string) : Promise<void> {
+export async function syncGitRepos(podName: string, containerName: string) : Promise<void> {
   const command = ['bash -c', '"/custom_script/git_detector.sh /__w"']
   const passThrough = new stream.PassThrough()
   let output = ''
@@ -307,5 +307,26 @@ export async function callGitCommand(podName: string, containerName: string) : P
     output += chunk.toString()
   })
   await execPodStep(command, podName, containerName, undefined, passThrough)
-  core.debug(`pass through output ${output}`)
+
+  const reposPaths = output.split('\n').filter(line => line.trim() !== '');
+  const prefixPath = '/home/runner/_work/';
+  for (const line of reposPaths) {
+    core.debug(`found a repo ${line}`)
+    const resolvedPath = path.join(prefixPath, line.trim());
+    const gitFilePath = path.join(resolvedPath, '.git');
+    core.debug(`checking if ${gitFilePath} has a git file`)
+    if (!fs.existsSync(gitFilePath)) {
+      core.debug(`copying from ${path.join('/__w',line.trim(),'/.')} to ${path.join('/home/runner/_work',line.trim())}`)
+      await copyFromPod(
+        podName,
+        containerName,
+        path.join('/__w',line.trim(),'/.'),
+        path.join('/home/runner/_work',line.trim())
+      )
+
+    }
+  }
+
 }
+
+

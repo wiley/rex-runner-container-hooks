@@ -287,7 +287,6 @@ export async function execPodStep(
 ): Promise<void> {
   const exec = new k8s.Exec(kc)
   command = fixArgs(command)
-  core.debug(`after fix args ${command}`)
   // Exec returns a websocket. If websocket fails, we should reject the promise. Otherwise, websocket will call a callback. Since at that point, websocket is not failing, we can safely resolve or reject the promise.
   await new Promise(function (resolve, reject) {
     exec
