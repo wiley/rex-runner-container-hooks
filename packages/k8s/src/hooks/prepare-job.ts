@@ -119,7 +119,14 @@ export async function prepareJob(
   )
 
   core.debug('Job pod is ready for traffic')
-
+  const gitDetector = path.join(__dirname, 'assets', 'git_detector.sh');
+  core.debug('copy git detector')
+  await copyToPod(
+    createdPod.metadata.name,
+    JOB_CONTAINER_NAME,
+    gitDetector,
+    '/whole_work_volume/'
+  )
   let isAlpine = false
   try {
     isAlpine = await isPodContainerAlpine(
