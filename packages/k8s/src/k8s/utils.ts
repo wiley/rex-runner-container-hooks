@@ -307,26 +307,19 @@ export async function syncGitRepos(podName: string, containerName: string) : Pro
     output += chunk.toString()
   })
   await execPodStep(command, podName, containerName, undefined, passThrough)
-
   const reposPaths = output.split('\n').filter(line => line.trim() !== '');
-  const prefixPath = '/home/runner/_work/';
   for (const line of reposPaths) {
-    core.debug(`found a repo ${line}`)
-    const resolvedPath = path.join(prefixPath, line.trim(), line.trim());
-    const gitFilePath = path.join(resolvedPath, '.git');
-    core.debug(`checking if ${gitFilePath} has a git file`)
-    if (!fs.existsSync(gitFilePath)) {
-      core.debug(`copying from ${path.join('/__w',line.trim(),'/.')} to ${path.join('/home/runner/_work',line.trim())}`)
-      await copyFromPod(
+    core.debug(`found ${line}`)
+    const remoteSource = path.join('/__w',line.trim())+'/.'
+    const localSource = path.join('/home/runner/_work',line.trim())
+    core.debug(`create directory ${localSource}`)
+    fs.mkdirSync(localSource, { recursive: true });
+    core.debug(`copying from ${remoteSource} to ${localSource}`)
+    await copyFromPod(
         podName,
         containerName,
         path.join('/__w',line.trim())+'/.',
         path.join('/home/runner/_work',line.trim())
-      )
-
-    }
+    )
   }
-
 }
-
-
