@@ -300,7 +300,7 @@ export function fixArgs(args: string[]): string[] {
 }
 
 export async function syncGitRepos(podName: string, containerName: string) : Promise<void> {
-  const command = ['bash -c', '"/whole_work_volume//git_detector.sh /__w"']
+  const command = ['bash -c', '"/whole_work_volume/git_detector.sh /__w"']
   const passThrough = new stream.PassThrough()
   let output = ''
   passThrough.on('data', chunk => {
