@@ -319,16 +319,17 @@ export async function syncGitRepos(
   core.debug(`Running git_detector.sh in ${workingDirectory} remotely`)
   await execPodStep(zipCommand, podName, containerName, undefined, passThrough)
   core.debug(
-    `copy actions.tar.gz from ${podName}:${containerName} to ${WDLocal}`
+    `copy actions.tar from ${podName}:${containerName} to ${WDLocal}`
   )
   await copyFromPod(
     podName,
     containerName,
-    path.resolve(workingDirectory, 'actions.tar.gz'),
+    path.resolve(workingDirectory, 'actions.tar'),
     WDLocal
   )
-  const localZipPath = path.resolve(WDLocal, 'actions.tar.gz')
-  const unzipCommand = `tar -xzf ${localZipPath} -C ${WDLocal}`
+  const localZipPath = path.resolve(WDLocal, 'actions.tar')
+  //TODO use native tar library
+  const unzipCommand = `tar -zf ${localZipPath} -C ${WDLocal}`
   core.debug(`Unzipping ${localZipPath} to ${WDLocal}`)
   exec(unzipCommand, (error, stdout, stderr) => {
     if (error) {
