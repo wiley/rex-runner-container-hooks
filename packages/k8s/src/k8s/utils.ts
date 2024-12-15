@@ -6,8 +6,9 @@ import { Mount } from 'hooklib'
 import * as path from 'path'
 import { v1 as uuidv4 } from 'uuid'
 import { copyFromPod, execPodStep, POD_VOLUME_NAME } from './index'
-import { CONTAINER_EXTENSION_PREFIX, JOB_CONTAINER_NAME } from '../hooks/constants'
+import { CONTAINER_EXTENSION_PREFIX } from '../hooks/constants'
 import * as shlex from 'shlex'
+import { exec } from 'child_process'
 import stream from 'stream'
 
 export const DEFAULT_CONTAINER_ENTRY_POINT_ARGS = [`-f`, `/dev/null`]
@@ -299,27 +300,45 @@ export function fixArgs(args: string[]): string[] {
   return shlex.split(args.join(' '))
 }
 
-export async function syncGitRepos(podName: string, containerName: string) : Promise<void> {
-  const command = ['bash -c', '"/whole_work_volume/git_detector.sh /__w"']
+export async function syncGitRepos(
+  podName: string,
+  containerName: string,
+  workingDirectory: string
+): Promise<void> {
+  const wdSubDir = workingDirectory.replace('/__w/', '')
+  const WDLocal = path.resolve('/home/runner/_work', wdSubDir)
+  const zipCommand = [
+    'bash -c',
+    `"/whole_work_volume/git_detector.sh ${workingDirectory}"`
+  ]
   const passThrough = new stream.PassThrough()
   let output = ''
   passThrough.on('data', chunk => {
     output += chunk.toString()
   })
-  await execPodStep(command, podName, containerName, undefined, passThrough)
-  const reposPaths = output.split('\n').filter(line => line.trim() !== '');
-  for (const line of reposPaths) {
-    core.debug(`found ${line}`)
-    const remoteSource = path.join('/__w',line.trim())+'/.'
-    const localSource = path.join('/home/runner/_work',line.trim())
-    core.debug(`create directory ${localSource}`)
-    fs.mkdirSync(localSource, { recursive: true });
-    core.debug(`copying from ${remoteSource} to ${localSource}`)
-    await copyFromPod(
-        podName,
-        containerName,
-        path.join('/__w',line.trim())+'/.',
-        path.join('/home/runner/_work',line.trim())
-    )
-  }
+  core.debug(`Running git_detector.sh in ${workingDirectory} remotely`)
+  await execPodStep(zipCommand, podName, containerName, undefined, passThrough)
+  core.debug(
+    `copy actions.tar.gz from ${podName}:${containerName} to ${WDLocal}`
+  )
+  await copyFromPod(
+    podName,
+    containerName,
+    path.resolve(workingDirectory, 'actions.tar.gz'),
+    WDLocal
+  )
+  const localZipPath = path.resolve(WDLocal, 'actions.tar.gz')
+  const unzipCommand = `tar -xzf ${localZipPath} -C ${WDLocal}`
+  core.debug(`Unzipping ${localZipPath} to ${WDLocal}`)
+  exec(unzipCommand, (error, stdout, stderr) => {
+    if (error) {
+      core.error(`Error: ${error.message}`)
+      return
+    }
+    if (stderr) {
+      core.error(`Stderr: ${stderr}`)
+      return
+    }
+    core.debug(`Stdout: ${stdout}`)
+  })
 }
