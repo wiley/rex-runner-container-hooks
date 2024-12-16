@@ -238,7 +238,7 @@ export async function copyToPod(
       dirname(sourcePath)
     )
   } catch (error) {
-    core.error(`Error copying to pod: ${error}`)
+    core.error(`Error copying ${targetPath} to pod: ${error}`)
     throw new Error('Error copying to pod')
   }
 
@@ -269,7 +269,7 @@ export async function copyFromPod(
       dirname(sourcePath)
     )
   } catch (error) {
-    core.error(`Error copying to pod: ${error}`)
+    core.error(`Error copying ${targetPath} from pod: ${error}`)
     throw new Error('Error copying to pod')
   }
 

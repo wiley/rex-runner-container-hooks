@@ -43,7 +43,7 @@ export class Cp {
     // Get the file size for logging purposes.
     const stats = fs.statSync(tmpFileName)
     const fileSizeInBytes = stats.size
-    core.debug(`Transferring: ${fileSizeInBytes.toLocaleString()} Bytes`)
+    core.info(`Transferring to pod ${srcPath}: ${fileSizeInBytes.toLocaleString()} Bytes`)
 
     const readStream = fs.createReadStream(tmpFileName)
 
