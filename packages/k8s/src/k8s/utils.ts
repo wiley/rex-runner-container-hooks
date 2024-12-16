@@ -10,6 +10,7 @@ import { CONTAINER_EXTENSION_PREFIX } from '../hooks/constants'
 import * as shlex from 'shlex'
 import { exec } from 'child_process'
 import stream from 'stream'
+import { mkdir } from 'fs/promises';
 
 export const DEFAULT_CONTAINER_ENTRY_POINT_ARGS = [`-f`, `/dev/null`]
 export const DEFAULT_CONTAINER_ENTRY_POINT = 'tail'
@@ -307,7 +308,7 @@ export async function syncGitRepos(
 ): Promise<void> {
   const wdSubDir = workingDirectory.replace('/__w/', '')
   const WDLocal = path.resolve('/home/runner/_work', wdSubDir)
-  const zipCommand = [
+  const githubFindCmnd = [
     'bash -c',
     `"/whole_work_volume/git_detector.sh ${workingDirectory}"`
   ]
@@ -317,29 +318,21 @@ export async function syncGitRepos(
     output += chunk.toString()
   })
   core.debug(`Running git_detector.sh in ${workingDirectory} remotely`)
-  await execPodStep(zipCommand, podName, containerName, undefined, passThrough)
-  core.debug(
-    `copy actions.tar from ${podName}:${containerName} to ${WDLocal}`
-  )
-  await copyFromPod(
-    podName,
-    containerName,
-    path.resolve(workingDirectory, 'actions.tar'),
-    WDLocal
-  )
-  const localZipPath = path.resolve(WDLocal, 'actions.tar')
-  //TODO use native tar library
-  const unzipCommand = `tar -xf ${localZipPath} -C ${WDLocal}`
-  core.debug(`Unzipping ${localZipPath} to ${WDLocal}`)
-  exec(unzipCommand, (error, stdout, stderr) => {
-    if (error) {
-      core.error(`Error: ${error.message}`)
-      return
-    }
-    if (stderr) {
-      core.error(`Stderr: ${stderr}`)
-      return
-    }
-    core.debug(`Stdout: ${stdout}`)
-  })
+  await execPodStep(githubFindCmnd, podName, containerName, undefined, passThrough)
+  const reposPaths = output.split('\n').filter(line => line.trim() !== '');
+  for (const line of reposPaths) {
+    const gaLocalPath = path.resolve(WDLocal, line)
+    await createDirectories(gaLocalPath)
+    core.debug(`copy ${line} from ${podName}:${containerName} to ${gaLocalPath}`)
+    await copyFromPod(
+      podName,
+      containerName,
+      path.resolve(workingDirectory, line)+"/.",
+      gaLocalPath
+    )
+  }
+}
+
+async function createDirectories(path: string): Promise<void> {
+  await mkdir(path, { recursive: true });
 }
