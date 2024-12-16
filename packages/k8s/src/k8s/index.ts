@@ -239,7 +239,7 @@ export async function copyToPod(
     )
   } catch (error) {
     core.error(`Error copying ${targetPath} to pod: ${error}`)
-    throw new Error('Error copying to pod')
+    throw error
   }
 
   const endTime = Date.now()
@@ -270,7 +270,7 @@ export async function copyFromPod(
     )
   } catch (error) {
     core.error(`Error copying ${targetPath} from pod: ${error}`)
-    throw new Error('Error copying to pod')
+    throw error
   }
 
   const endTime = Date.now()
