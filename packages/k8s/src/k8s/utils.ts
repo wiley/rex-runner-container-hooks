@@ -329,7 +329,7 @@ export async function syncGitRepos(
   )
   const localZipPath = path.resolve(WDLocal, 'actions.tar')
   //TODO use native tar library
-  const unzipCommand = `tar -zf ${localZipPath} -C ${WDLocal}`
+  const unzipCommand = `tar -xf ${localZipPath} -C ${WDLocal}`
   core.debug(`Unzipping ${localZipPath} to ${WDLocal}`)
   exec(unzipCommand, (error, stdout, stderr) => {
     if (error) {
