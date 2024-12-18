@@ -255,7 +255,7 @@ export async function copyFromPod(
 ): Promise<void> {
   const startTime = Date.now()
   try {
-    const cp = new k8s.Cp(kc)
+    const cp = new localCp.Cp(kc)
 
     core.debug(
       `Copying from pod ${podName} container ${containerName} from ${sourcePath} to ${targetPath} in namespace ${namespace()}`

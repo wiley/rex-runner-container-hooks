@@ -4,6 +4,8 @@ import * as core from '@actions/core'
 import { tmpdir } from 'os'
 import * as k8s from '@kubernetes/client-node'
 import { randomUUID } from 'crypto'
+import { WritableStreamBuffer } from "stream-buffers";
+
 
 export class Cp {
   execInstance: k8s.Exec
@@ -79,6 +81,51 @@ export class Cp {
     })
   }
 
+  async cpFromPod(
+    namespace: string,
+    podName: string,
+    containerName: string,
+    srcPath: string,
+    tgtPath: string,
+    cwd?: string
+  ): Promise<void> {
+    // Generate a temporary file for the tar archive.
+    const tmpFileName = await this.generateTmpFileName()
+    const command = ['tar', 'zcf', '-']
+    if (cwd) {
+      command.push('-C', cwd);
+    }
+    command.push(srcPath);
+    const writerStream = fs.createWriteStream(tmpFileName);
+    const errStream = new WritableStreamBuffer();
+    core.debug(`Archiving ${srcPath} to ${tmpFileName} remotely`)
+    core.debug('Exec cpFromPod')
+
+    // Refactor this part to wait for the status in the callback
+    return new Promise((resolve, reject) => {
+       this.execInstance
+        .exec(namespace, podName, containerName, command, writerStream, errStream, null, false, async ({ status }) => {
+          try {
+            writerStream.close();
+            if (status === 'Failure' || errStream.size()) {
+              return reject(new Error(`Error from cpFromPod - details: \n ${errStream.getContentsAsString()}`));
+            }
+            const stats = fs.statSync(tmpFileName)
+            const fileSizeInBytes = stats.size
+            core.info(`Transferring from remote ${srcPath}: ${fileSizeInBytes.toLocaleString()} Bytes`)
+            await tar.x({
+              file: tmpFileName,
+              cwd: tgtPath,
+            });
+            resolve();
+          }
+          catch (e) {
+            reject(e);
+          }
+        })
+        .catch(reject);
+    });
+  }
   async generateTmpFileName(): Promise<string> {
     let tmpFileName: string
 
