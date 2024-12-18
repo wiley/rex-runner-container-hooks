@@ -309,7 +309,7 @@ export async function syncGitRepos(
   const wdSubDir = workingDirectory.replace('/__w/', '')
   const WDLocal = path.resolve('/home/runner/_work', wdSubDir)
   const githubFindCmnd = [
-    'bash -c',
+    '/usr/bin/bash -c',
     `"/whole_work_volume/git_detector.sh ${workingDirectory}"`
   ]
   const passThrough = new stream.PassThrough()
