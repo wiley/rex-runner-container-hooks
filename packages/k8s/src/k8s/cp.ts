@@ -106,6 +106,8 @@ export class Cp {
        this.execInstance
         .exec(namespace, podName, containerName, command, writerStream, errStream, null, false, async ({ status }) => {
           try {
+            core.debug(`waiting before close stream`)
+            await sleep(10000);
             writerStream.close();
             if (status === 'Failure' || errStream.size()) {
               return reject(new Error(`Error from cpFromPod - details: \n ${errStream.getContentsAsString()}`));
@@ -113,6 +115,11 @@ export class Cp {
             const stats = fs.statSync(tmpFileName)
             const fileSizeInBytes = stats.size
             core.info(`Transferring from remote ${srcPath}: ${fileSizeInBytes.toLocaleString()} Bytes`)
+            core.debug(`waiting after close stream`)
+            await sleep(10000);
+            const stats1 = fs.statSync(tmpFileName)
+            const fileSizeInBytes1 = stats1.size
+            core.info(`get file a gain, transferring from remote ${srcPath}: ${fileSizeInBytes1.toLocaleString()} Bytes`)
             await tar.x({
               file: tmpFileName,
               cwd: tgtPath,
@@ -146,4 +153,7 @@ export class Cp {
 
     throw new Error('Cannot generate tmp file name')
   }
+}
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
