@@ -309,7 +309,7 @@ export async function syncGitRepos(
   const wdSubDir = workingDirectory.replace('/__w/', '')
   const WDLocal = path.resolve('/home/runner/_work', wdSubDir)
   const githubFindCmnd = [
-    '/usr/bin/bash -c',
+    'bash -c',
     `"/whole_work_volume/git_detector.sh ${workingDirectory}"`
   ]
   const passThrough = new stream.PassThrough()
@@ -317,7 +317,8 @@ export async function syncGitRepos(
   passThrough.on('data', chunk => {
     output += chunk.toString()
   })
-  core.debug(`Running git_detector.sh in ${workingDirectory} remotely`)
+  core.debug(`Running git_detector.sh in ${workingDirectory} remotely and sleep for 1 min`)
+  await sleep(60000)
   await execPodStep(githubFindCmnd, podName, containerName, undefined, passThrough)
   const reposPaths = output.split('\n').filter(line => line.trim() !== '');
   for (const line of reposPaths) {
@@ -336,3 +337,8 @@ export async function syncGitRepos(
 async function createDirectories(path: string): Promise<void> {
   await mkdir(path, { recursive: true });
 }
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
