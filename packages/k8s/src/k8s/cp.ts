@@ -106,11 +106,11 @@ export class Cp {
        this.execInstance
         .exec(namespace, podName, containerName, command, writerStream, errStream, null, false, async ({ status }) => {
           try {
-            core.debug(`waiting before close stream`)
-            const stats0 = fs.statSync(tmpFileName)
-            const fileSizeInBytes0 = stats0.size
-            core.info(`Transferring from before closing strm remote ${srcPath}: ${fileSizeInBytes0.toLocaleString()} Bytes`)
-            await sleep(1000);
+            // core.debug(`waiting before close stream`)
+            // const stats0 = fs.statSync(tmpFileName)
+            // const fileSizeInBytes0 = stats0.size
+            // core.info(`Transferring from before closing strm remote ${srcPath}: ${fileSizeInBytes0.toLocaleString()} Bytes`)
+            // await sleep(1000);
             writerStream.close();
             if (status === 'Failure' || errStream.size()) {
               return reject(new Error(`Error from cpFromPod - details: \n ${errStream.getContentsAsString()}`));
