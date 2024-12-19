@@ -107,19 +107,22 @@ export class Cp {
         .exec(namespace, podName, containerName, command, writerStream, errStream, null, false, async ({ status }) => {
           try {
             core.debug(`waiting before close stream`)
-            await sleep(10000);
+            const stats0 = fs.statSync(tmpFileName)
+            const fileSizeInBytes0 = stats0.size
+            core.info(`Transferring from before closing strm remote ${srcPath}: ${fileSizeInBytes0.toLocaleString()} Bytes`)
+            await sleep(1000);
             writerStream.close();
             if (status === 'Failure' || errStream.size()) {
               return reject(new Error(`Error from cpFromPod - details: \n ${errStream.getContentsAsString()}`));
             }
             const stats = fs.statSync(tmpFileName)
             const fileSizeInBytes = stats.size
-            core.info(`Transferring from remote ${srcPath}: ${fileSizeInBytes.toLocaleString()} Bytes`)
+            core.info(`Transferring from remote after closing the stream ${srcPath}: ${fileSizeInBytes.toLocaleString()} Bytes`)
             core.debug(`waiting after close stream`)
-            await sleep(10000);
+            await sleep(1000);
             const stats1 = fs.statSync(tmpFileName)
             const fileSizeInBytes1 = stats1.size
-            core.info(`get file a gain, transferring from remote ${srcPath}: ${fileSizeInBytes1.toLocaleString()} Bytes`)
+            core.info(`get file last time, transferring from remote ${srcPath}: ${fileSizeInBytes1.toLocaleString()} Bytes`)
             await tar.x({
               file: tmpFileName,
               cwd: tgtPath,

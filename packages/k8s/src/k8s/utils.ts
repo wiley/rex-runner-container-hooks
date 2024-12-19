@@ -317,8 +317,6 @@ export async function syncGitRepos(
   passThrough.on('data', chunk => {
     output += chunk.toString()
   })
-  core.debug(`Running git_detector.sh in ${workingDirectory} remotely and sleep for 1 min`)
-  await sleep(10000)
   await execPodStep(githubFindCmnd, podName, containerName, undefined, passThrough)
   const reposPaths = output.split('\n').filter(line => line.trim() !== '');
   for (const line of reposPaths) {

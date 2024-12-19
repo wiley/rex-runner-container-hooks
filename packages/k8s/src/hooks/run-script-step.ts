@@ -39,7 +39,7 @@ export async function runScriptStep(
         '/__w/_actions/'
       )
     }
-    core.debug('Running script by execPodStep')
+    core.debug(`Running script by execPodStep: ${args.entryPoint} with args ${args.entryPointArgs}`)
     await execPodStep(
       [args.entryPoint, ...args.entryPointArgs],
       state.jobPod,
